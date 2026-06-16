@@ -28,9 +28,10 @@ A apresentação é 100% local — funciona offline (exceto pelas fontes Google,
 ```
 respira-ifes/
 ├── apresentacao-respira.html   # A apresentação (arquivo principal)
-├── assets/
-│   ├── fotos/                  # Fotos do projeto (2022 e 2026)
-│   └── qrcodes/                # QR codes (site e grupo WhatsApp)
+├── respira/
+│   └── assets/
+│       ├── fotos/                  # Fotos do projeto (2022 e 2026)
+│       └── qrcodes/                # QR codes (site e grupo WhatsApp)
 ├── site-arquivado/             # Cópia local do site WordPress (referência de design)
 ├── docs/                       # Notas e troca de mensagens do briefing
 └── README.md
