@@ -1,0 +1,61 @@
+/* stretch-timer.js — cronômetro da sessão de alongamento */
+(function () {
+  'use strict';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const mainEl   = document.getElementById('stretchChronoMain');
+    const msEl     = document.getElementById('stretchChronoMs');
+    const startBtn = document.getElementById('stretchChronoBtn');
+    const resetBtn = document.getElementById('stretchChronoReset');
+    const chrono   = document.getElementById('stretchChrono');
+    if (!mainEl || !msEl || !startBtn || !resetBtn) return;
+
+    let centiseconds = 0; // centésimos de segundo
+    let running      = false;
+    let timer        = null;
+    let startTime    = 0;
+    let accumulated  = 0;
+
+    function updateDisplay() {
+      const cs   = centiseconds;
+      const secs = Math.floor(cs / 100);
+      const mins = Math.floor(secs / 60);
+      mainEl.textContent = mins + ':' + String(secs % 60).padStart(2, '0');
+      msEl.textContent   = '.' + String(cs % 100).padStart(2, '0');
+    }
+
+    function start() {
+      running   = true;
+      startTime = Date.now();
+      startBtn.textContent = '⏸ Pausar';
+      startBtn.classList.add('running');
+      chrono.classList.add('chrono-active');
+
+      timer = setInterval(() => {
+        centiseconds = accumulated + Math.floor((Date.now() - startTime) / 10);
+        updateDisplay();
+      }, 30); // atualiza ~33× por segundo
+    }
+
+    function pause() {
+      running     = false;
+      accumulated = centiseconds;
+      clearInterval(timer);
+      timer = null;
+      startBtn.textContent = '▶ Continuar';
+      startBtn.classList.remove('running');
+    }
+
+    function reset() {
+      pause();
+      centiseconds = 0;
+      accumulated  = 0;
+      updateDisplay();
+      startBtn.textContent = '▶ Iniciar cronômetro';
+      chrono.classList.remove('chrono-active');
+    }
+
+    startBtn.addEventListener('click', () => { running ? pause() : start(); });
+    resetBtn.addEventListener('click', reset);
+  });
+})();

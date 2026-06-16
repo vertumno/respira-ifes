@@ -1,0 +1,102 @@
+/* session-tracker.js — grava sessões via REST API e exibe tracker pessoal */
+(function () {
+  'use strict';
+
+  const CACHE_KEY = 'respire_stats_cache';
+
+  function getRestUrl()  { return (window.RESPIRE && window.RESPIRE.restUrl)  || '/wp-json/respire/v1/'; }
+  function getNonce()    { return (window.RESPIRE && window.RESPIRE.nonce)    || ''; }
+
+  async function postSession(technique, durationSeconds, completed) {
+    if (!window.RespireConsent || !window.RespireConsent.hasConsent()) return null;
+    try {
+      const res = await fetch(getRestUrl() + 'session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': getNonce() },
+        body: JSON.stringify({ technique, duration_seconds: durationSeconds, completed }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.total_sessions !== undefined) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+        updateTrackerUI(data);
+      }
+      return data;
+    } catch (e) { return null; }
+  }
+
+  async function fetchStats() {
+    if (!window.RespireConsent || !window.RespireConsent.hasConsent()) return;
+
+    // Use cache (5 min) to avoid unnecessary requests
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { ts, data } = JSON.parse(cached);
+      if (Date.now() - ts < 5 * 60 * 1000) { updateTrackerUI(data); return; }
+    }
+
+    try {
+      const res = await fetch(getRestUrl() + 'session/stats', {
+        headers: { 'X-WP-Nonce': getNonce() },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+      updateTrackerUI(data);
+    } catch (e) { /* silent */ }
+  }
+
+  function updateTrackerUI(data) {
+    const card = document.getElementById('trackerCard');
+    if (!card) return;
+
+    const sessions = data.total_sessions || 0;
+    const minutes  = Math.round((data.total_seconds || 0) / 60);
+
+    if (sessions === 0) { card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+
+    const sEl = document.getElementById('trackerSessions');
+    const mEl = document.getElementById('trackerMinutes');
+    const lRow = document.getElementById('trackerLastRow');
+    const lEl  = document.getElementById('trackerLast');
+
+    if (sEl) sEl.textContent = sessions;
+    if (mEl) mEl.textContent = minutes;
+
+    if (data.last_sessions && data.last_sessions.length > 0 && lRow && lEl) {
+      const last = data.last_sessions[0];
+      const d    = new Date(last.created_at.replace(' ', 'T'));
+      const now  = new Date();
+      const diff = Math.floor((now - d) / 60000);
+      let lbl;
+      if (diff < 2)        lbl = 'agora mesmo';
+      else if (diff < 60)  lbl = `há ${diff} min`;
+      else if (diff < 1440) lbl = `hoje, ${d.getHours()}h${String(d.getMinutes()).padStart(2,'0')}`;
+      else                 lbl = d.toLocaleDateString('pt-BR');
+      lEl.textContent = lbl;
+      lRow.style.display = '';
+    }
+  }
+
+  // Sessão completa
+  window.addEventListener('respire:sessionComplete', (e) => {
+    const { technique, duration } = e.detail;
+    postSession(technique, duration, true);
+  });
+
+  // Sessão interrompida com mais de 1 minuto praticado
+  window.addEventListener('respire:sessionStopped', (e) => {
+    const { technique, duration } = e.detail;
+    postSession(technique, duration, false);
+  });
+
+  // Load stats on consent or on page load if already consented
+  window.addEventListener('respire:consent', (e) => {
+    if (e.detail.accepted) fetchStats();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.RespireConsent && window.RespireConsent.hasConsent()) fetchStats();
+  });
+})();

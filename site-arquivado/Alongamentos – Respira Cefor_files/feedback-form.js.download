@@ -1,0 +1,186 @@
+/* feedback-form.js — carrega feedbacks aprovados e envia novos */
+(function () {
+  'use strict';
+
+  function getRestUrl() { return (window.RESPIRE && window.RESPIRE.restUrl) || '/wp-json/respire/v1/'; }
+  function getNonce()   { return (window.RESPIRE && window.RESPIRE.nonce)   || ''; }
+
+  // ---- Relative time helper ----
+  function relativeTime(dateStr) {
+    const d    = new Date(dateStr.replace(' ', 'T'));
+    const diff = Math.floor((Date.now() - d) / 1000);
+    if (diff < 60)   return 'agora mesmo';
+    if (diff < 3600) return `há ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `há ${Math.floor(diff / 3600)}h`;
+    if (diff < 604800) return `há ${Math.floor(diff / 86400)} dia${diff < 172800 ? '' : 's'}`;
+    return d.toLocaleDateString('pt-BR');
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ---- Load feedbacks ----
+  async function loadFeedbacks() {
+    const grid  = document.getElementById('feedbacksGrid');
+    const empty = document.getElementById('feedbacksEmpty');
+    if (!grid) return;
+
+    try {
+      const res  = await fetch(getRestUrl() + 'feedbacks');
+      if (!res.ok) throw new Error();
+      const list = await res.json();
+
+      if (!list.length) {
+        if (empty) empty.textContent = 'Seja o primeiro a compartilhar sua experiência!';
+        return;
+      }
+
+      // Remove loading placeholder
+      if (empty) empty.remove();
+
+      list.forEach(fb => {
+        const card = document.createElement('div');
+        card.className = 'feedback-card';
+        const stars = '★'.repeat(fb.stars) + '☆'.repeat(5 - fb.stars);
+        card.innerHTML = `
+          <div class="feedback-top">
+            <div class="feedback-author">
+              <span class="feedback-emoji">${escHtml(fb.emoji)}</span>
+              <div>
+                <div class="feedback-name">${escHtml(fb.name)}</div>
+                <div class="feedback-stars">${stars}</div>
+              </div>
+            </div>
+            <span class="feedback-date">${relativeTime(fb.date)}</span>
+          </div>
+          ${fb.comment ? `<div class="feedback-comment">"${escHtml(fb.comment)}"</div>` : ''}
+        `;
+        grid.appendChild(card);
+      });
+    } catch (e) {
+      if (empty) empty.textContent = 'Não foi possível carregar os depoimentos.';
+    }
+  }
+
+  // ---- Feedback form ----
+  function initForm() {
+    const form    = document.getElementById('feedbackForm');
+    const msgEl   = document.getElementById('feedbackMessage');
+    const submitEl = document.getElementById('feedbackSubmit');
+    if (!form) return;
+
+    let selectedEmoji = '😌';
+    let selectedStars = 5;
+
+    // Emoji picker
+    document.querySelectorAll('.emoji-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.emoji-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedEmoji = btn.dataset.emoji;
+      });
+    });
+
+    // Star rating
+    const starBtns = document.querySelectorAll('.star-btn');
+    starBtns.forEach(btn => {
+      btn.addEventListener('mouseenter', () => highlightStars(parseInt(btn.dataset.star, 10)));
+      btn.addEventListener('mouseleave', () => highlightStars(selectedStars));
+      btn.addEventListener('click', () => {
+        selectedStars = parseInt(btn.dataset.star, 10);
+        highlightStars(selectedStars);
+      });
+    });
+
+    function highlightStars(n) {
+      starBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.star, 10) <= n));
+    }
+
+    function showMessage(type, text) {
+      msgEl.className = 'form-message ' + type;
+      msgEl.textContent = text;
+      msgEl.style.display = '';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!window.RespireConsent || !window.RespireConsent.hasConsent()) {
+        showMessage('error', 'Você precisa aceitar os cookies para enviar um feedback.');
+        return;
+      }
+
+      const name    = document.getElementById('feedbackName')?.value.trim();
+      const comment = document.getElementById('feedbackComment')?.value.trim();
+
+      if (!name) {
+        showMessage('error', 'Por favor, informe seu nome.');
+        return;
+      }
+
+      submitEl.disabled = true;
+      submitEl.textContent = 'Enviando…';
+      msgEl.style.display = 'none';
+
+      try {
+        const res = await fetch(getRestUrl() + 'feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': getNonce() },
+          body: JSON.stringify({ name, emoji: selectedEmoji, stars: selectedStars, comment }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.saved) {
+          showMessage('success', '🌿 Obrigado! Seu feedback será publicado após aprovação.');
+          form.reset();
+          document.querySelectorAll('.emoji-option').forEach((b, i) => b.classList.toggle('selected', i === 0));
+          selectedEmoji = '😌'; selectedStars = 5; highlightStars(5);
+          // Fecha o modal após 2s
+          setTimeout(() => closeModal(), 2000);
+        } else {
+          const msg = data.message || 'Não foi possível enviar. Tente novamente.';
+          showMessage('error', msg);
+        }
+      } catch (err) {
+        showMessage('error', 'Erro de conexão. Verifique sua internet e tente novamente.');
+      } finally {
+        submitEl.disabled = false;
+        submitEl.textContent = 'Enviar feedback';
+      }
+    });
+  }
+
+  // ---- Modal ----
+  const modal     = document.getElementById('feedbackModal');
+  const openBtn   = document.getElementById('openFeedbackModal');
+  const closeBtn  = document.getElementById('feedbackModalClose');
+
+  function openModal() {
+    if (!modal) return;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => modal.querySelector('input,textarea')?.focus(), 100);
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    const msgEl = document.getElementById('feedbackMessage');
+    if (msgEl) msgEl.style.display = 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadFeedbacks();
+    initForm();
+
+    openBtn  && openBtn.addEventListener('click', openModal);
+    closeBtn && closeBtn.addEventListener('click', closeModal);
+    modal    && modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  });
+})();

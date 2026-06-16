@@ -1,0 +1,252 @@
+/* breathing-engine.js — timer e animação de respiração */
+(function (global) {
+  'use strict';
+
+  const techniques = {
+    quadrada: {
+      phases: [
+        { label: 'Inspire',  duration: 4, tone: 'inhale' },
+        { label: 'Segure',   duration: 4, tone: 'hold'   },
+        { label: 'Expire',   duration: 4, tone: 'exhale' },
+        { label: 'Segure',   duration: 4, tone: 'hold'   },
+      ],
+      desc: '<strong>Respiração Quadrada:</strong> Inspire, segure, expire e segure — cada fase com a mesma duração. Técnica usada por atletas e militares para acalmar o sistema nervoso.',
+    },
+    circular: {
+      phases: [
+        { label: 'Inspire', duration: 4, tone: 'inhale' },
+        { label: 'Expire',  duration: 6, tone: 'exhale' },
+      ],
+      desc: '<strong>Respiração Circular:</strong> Inspire pelo nariz, expire lentamente pela boca, sem pausas. O fluxo contínuo acalma a mente e reduz a ansiedade.',
+    },
+    narinas: {
+      phases: [
+        { label: 'Inspire (E)', duration: 4, tone: 'inhale' },
+        { label: 'Segure',      duration: 2, tone: 'hold'   },
+        { label: 'Expire (D)',  duration: 4, tone: 'exhale' },
+        { label: 'Inspire (D)', duration: 4, tone: 'inhale' },
+        { label: 'Segure',      duration: 2, tone: 'hold'   },
+        { label: 'Expire (E)',  duration: 4, tone: 'exhale' },
+      ],
+      desc: '<strong>Narinas Alternadas:</strong> Alterne a respiração entre as narinas com polegar e anelar. Equilibra os hemisférios cerebrais, promove foco e calma.',
+    },
+    completa: {
+      phases: [
+        { label: 'Abdômen',   duration: 3, tone: 'inhale' },
+        { label: 'Tórax',     duration: 3, tone: 'inhale' },
+        { label: 'Clavículas', duration: 2, tone: 'inhale' },
+        { label: 'Expire',    duration: 6, tone: 'exhale' },
+      ],
+      desc: '<strong>Respiração Completa:</strong> Preencha abdômen, tórax e clavículas. Expire esvaziando na ordem inversa. Maximiza a capacidade pulmonar.',
+    },
+  };
+
+  // DOM refs — capturados após o DOM estar pronto (script no footer)
+  let circleEl, phaseEl, counterEl, startBtn, descEl, ringBarEl, timeLblEl, breathApp;
+
+  const RADIUS = 124;
+  const CIRC   = 2 * Math.PI * RADIUS;
+
+  let currentTechnique = 'quadrada';
+  let selectedDuration = 5;
+  let isRunning        = false;
+  let breathTimer      = null;
+  let countdownTimer   = null;
+  let totalElapsed     = 0;
+
+  function fmt(s) {
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function updateTimeLabel() {
+    if (timeLblEl) timeLblEl.textContent = fmt(totalElapsed) + ' / ' + fmt(selectedDuration * 60);
+  }
+
+  function resetVisual() {
+    if (phaseEl)   phaseEl.textContent   = 'Pronto?';
+    if (counterEl) counterEl.textContent = '•';
+    if (circleEl) { circleEl.style.transform = 'scale(1)'; circleEl.classList.remove('breathing'); }
+    if (ringBarEl) ringBarEl.style.strokeDashoffset = CIRC;
+    totalElapsed = 0;
+    updateTimeLabel();
+  }
+
+  // ---- Fase real de respiração ----
+  function runBreathing() {
+    const totalSec = selectedDuration * 60;
+    const phases   = techniques[currentTechnique].phases;
+    let phaseIdx    = 0;
+    let phaseTime   = 0;
+    let lastToneKey = '';
+    let currentScale = 1;
+
+    function tick() {
+      if (!isRunning) return;
+      const phase  = phases[phaseIdx];
+      const remain = phase.duration - phaseTime;
+
+      if (phaseEl)   phaseEl.textContent   = phase.label;
+      if (counterEl) counterEl.textContent = remain;
+
+      // Tom sonoro no início da fase
+      const toneKey = phaseIdx + '-' + phaseTime;
+      if (phaseTime === 0 && toneKey !== lastToneKey) {
+        lastToneKey = toneKey;
+        const audio = global.RespireAudio;
+        if (audio) {
+          if (phase.tone === 'inhale') audio.playInhale();
+          else if (phase.tone === 'exhale') audio.playExhale();
+          else if (phase.tone === 'hold')   audio.playHold();
+        }
+      }
+
+      // Animação do círculo
+      const lbl  = phase.label.toLowerCase();
+      const prog = phaseTime / phase.duration;
+      if (lbl.includes('inspire') || lbl.includes('abdômen') || lbl.includes('tórax') || lbl.includes('clavícula')) {
+        currentScale = 1 + 0.22 * prog;
+      } else if (lbl.includes('expire')) {
+        currentScale = 1.22 - 0.22 * prog;
+      } else {
+        currentScale = currentScale + 0.015 * Math.sin(phaseTime * Math.PI * 0.8);
+      }
+      if (circleEl) circleEl.style.transform = 'scale(' + currentScale + ')';
+
+      // Anel de progresso + tempo
+      totalElapsed++;
+      if (ringBarEl) ringBarEl.style.strokeDashoffset = CIRC * (1 - totalElapsed / totalSec);
+      updateTimeLabel();
+
+      if (totalElapsed >= totalSec) { finishBreathing(); return; }
+
+      phaseTime++;
+      if (phaseTime >= phase.duration) {
+        phaseTime = 0;
+        phaseIdx  = (phaseIdx + 1) % phases.length;
+        lastToneKey = '';
+      }
+    }
+
+    tick();
+    breathTimer = setInterval(tick, 1000);
+  }
+
+  // ---- Contagem regressiva 3-2-1 ----
+  function startBreathing() {
+    isRunning    = true;
+    totalElapsed = 0;
+    startBtn.textContent = 'Parar';
+    startBtn.classList.add('running');
+    if (breathApp) breathApp.classList.add('is-running');
+    if (circleEl)  circleEl.classList.add('breathing');
+
+    let count = 3;
+
+    function countStep() {
+      if (!isRunning) return;
+      if (count > 0) {
+        if (phaseEl)   phaseEl.textContent   = 'Prepare-se';
+        if (counterEl) counterEl.textContent = count;
+        count--;
+        countdownTimer = setTimeout(countStep, 1000);
+      } else {
+        countdownTimer = null;
+        runBreathing();
+      }
+    }
+
+    countStep();
+  }
+
+  function stopBreathing() {
+    const elapsed = totalElapsed; // captura antes do reset
+    isRunning = false;
+    clearTimeout(countdownTimer);
+    countdownTimer = null;
+    clearInterval(breathTimer);
+    breathTimer = null;
+    startBtn.textContent = 'Iniciar respiração';
+    startBtn.classList.remove('running');
+    if (breathApp) breathApp.classList.remove('is-running');
+    resetVisual();
+
+    // Salva sessão parcial se praticou mais de 1 minuto
+    if (elapsed > 60) {
+      window.dispatchEvent(new CustomEvent('respire:sessionStopped', {
+        detail: { technique: currentTechnique, duration: elapsed },
+      }));
+    }
+  }
+
+  function finishBreathing() {
+    isRunning = false;
+    clearInterval(breathTimer);
+    breathTimer = null;
+    if (breathApp) breathApp.classList.remove('is-running');
+    const audio = global.RespireAudio;
+    if (audio) {
+      audio.playComplete();
+      // Fadeout do som ambiente 1.5s após o acorde final
+      setTimeout(() => audio.fadeOutAmbient(2.5), 1500);
+    }
+    if (phaseEl)   phaseEl.textContent   = 'Completo ✓';
+    if (counterEl) counterEl.textContent = '🌿';
+    if (circleEl) circleEl.style.transform = 'scale(1)';
+    startBtn.textContent = 'Reiniciar';
+    startBtn.classList.remove('running');
+    if (timeLblEl) timeLblEl.textContent = fmt(selectedDuration * 60) + ' / ' + fmt(selectedDuration * 60);
+
+    // Notifica o session tracker
+    window.dispatchEvent(new CustomEvent('respire:sessionComplete', {
+      detail: { technique: currentTechnique, duration: selectedDuration * 60 },
+    }));
+
+    setTimeout(() => { if (!isRunning && circleEl) circleEl.classList.remove('breathing'); }, 3000);
+  }
+
+  // ---- Wire UI ----
+  document.addEventListener('DOMContentLoaded', () => {
+    // Captura refs após DOM pronto
+    circleEl  = document.getElementById('breathCircle');
+    phaseEl   = document.getElementById('breathPhase');
+    counterEl = document.getElementById('breathCounter');
+    startBtn  = document.getElementById('breathStartBtn');
+    descEl    = document.getElementById('breathDesc');
+    ringBarEl = document.getElementById('ringBar');
+    timeLblEl = document.getElementById('breathTimeLabel');
+    breathApp = document.getElementById('breathApp');
+
+    if (ringBarEl) {
+      ringBarEl.style.strokeDasharray  = CIRC;
+      ringBarEl.style.strokeDashoffset = CIRC;
+    }
+
+    document.querySelectorAll('.breath-tech-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isRunning) stopBreathing();
+        document.querySelectorAll('.breath-tech-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTechnique = btn.dataset.technique;
+        if (descEl) descEl.innerHTML = techniques[currentTechnique].desc;
+        resetVisual();
+      });
+    });
+
+    document.querySelectorAll('.dur-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isRunning) stopBreathing();
+        document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedDuration = parseInt(btn.dataset.duration, 10);
+        resetVisual();
+      });
+    });
+
+    startBtn && startBtn.addEventListener('click', () => {
+      isRunning ? stopBreathing() : startBreathing();
+    });
+
+    updateTimeLabel();
+  });
+
+})(window);

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Respira Cefor — Apresentação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ── */
+:root {
+  --deep:         #0f2027;
+  --ocean-dark:   #1a3a4a;
+  --ocean:        #2c5f6e;
+  --ocean-light:  #3d8a96;
+  --teal:         #5bbfb5;
+  --teal-glow:    #7ee8db;
+  --terracotta:   #c4704e;
+  --white:        #ffffff;
+  --muted:        rgba(255,255,255,0.62);
+  --font-d:       'Cormorant Garamond', Georgia, serif;
+  --font-b:       'Outfit', system-ui, sans-serif;
+  --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font-b);
+  font-size: 18px; /* base aumentada para datashow */
+  background: var(--deep);
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── DECK ── */
+.deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+
+/* ── SLIDE ── */
+.slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 72px 56px 84px;
+  background: linear-gradient(155deg, var(--deep) 0%, var(--ocean-dark) 40%, var(--ocean) 72%, var(--ocean-light) 100%);
+  opacity: 0;
+  transition: opacity 0.55s var(--ease);
+  pointer-events: none;
+  overflow-y: auto;
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+/* ── ORBS ── */
+.orbs { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(100px); opacity: 0.15;
+  animation: float 20s ease-in-out infinite alternate;
+}
+.orb-a { width: 540px; height: 540px; background: var(--teal);        top:-22%;  left:-20%; }
+.orb-b { width: 420px; height: 420px; background: var(--terracotta);  bottom:-20%; right:-15%; animation-delay:-8s; }
+.orb-c { width: 280px; height: 280px; background: var(--ocean-light); top:35%;  right:5%;   animation-delay:-14s; animation-duration:16s; }
+@keyframes float {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(24px,-20px) scale(1.1); }
+}
+
+/* ── INNER ── */
+.inner      { position: relative; z-index: 2; max-width: 920px; width: 100%; }
+.inner-wide { max-width: 1040px; }
+
+/* ── TIPO GLOBAL ── */
+.label {
+  display: block; margin-bottom: 14px;
+  font-size: 0.78rem; letter-spacing: 3.5px; text-transform: uppercase;
+  color: var(--teal); font-weight: 600;
+}
+.title {
+  font-family: var(--font-d);
+  font-size: clamp(2.4rem, 5.5vw, 4.6rem);
+  font-weight: 300; line-height: 1.1; margin-bottom: 32px;
+}
+.title em { font-style: italic; color: var(--teal-glow); }
+
+/* ═══════════ SLIDE 1 — HERO ═══════════ */
+.s1 { text-align: center; }
+.s1 .badge {
+  display: inline-block; margin-bottom: 28px;
+  padding: 8px 26px; border-radius: 30px;
+  border: 1px solid rgba(255,255,255,0.22);
+  font-size: 0.78rem; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--teal-glow); font-weight: 500;
+}
+.s1 h1 {
+  font-family: var(--font-d);
+  font-size: clamp(4rem, 9.5vw, 8rem);
+  font-weight: 300; line-height: 1.02; margin-bottom: 22px;
+}
+.s1 h1 em { font-style: italic; color: var(--teal-glow); }
+.s1 .sub {
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem); color: var(--muted);
+  font-weight: 300; max-width: 500px; margin: 0 auto 48px; line-height: 1.7;
+}
+.breath-orb {
+  width: 116px; height: 116px; border-radius: 50%; margin: 0 auto;
+  background: radial-gradient(circle at 36% 32%, var(--teal), var(--ocean));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 56px rgba(91,191,181,0.3);
+  animation: breathe 5s ease-in-out infinite;
+}
+.breath-orb span { font-family: var(--font-d); font-size: 1rem; color: var(--white); letter-spacing: 1px; }
+@keyframes breathe {
+  0%,100% { transform: scale(1);     box-shadow: 0 0 40px rgba(91,191,181,0.25); }
+  50%      { transform: scale(1.18);  box-shadow: 0 0 80px rgba(91,191,181,0.45); }
+}
+
+/* ═══════════ SLIDE 2 — O QUE É ═══════════ */
+.cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.card {
+  padding: 28px 24px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(91,191,181,0.2);
+  border-radius: 18px;
+}
+.card-ico  { font-size: 2.2rem; margin-bottom: 14px; }
+.card-head { font-family: var(--font-d); font-size: 1.6rem; font-weight: 400; margin-bottom: 10px; }
+.card-text { font-size: 1rem; color: var(--muted); line-height: 1.65; }
+
+/* ═══════════ SLIDE 3 — BENEFÍCIOS ═══════════ */
+.benefits { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 22px; }
+.benefit {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+  padding: 22px 12px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(91,191,181,0.15);
+  border-radius: 16px;
+}
+.benefit-ico {
+  width: 58px; height: 58px; border-radius: 50%; font-size: 1.6rem;
+  background: rgba(91,191,181,0.12); border: 1px solid rgba(91,191,181,0.28);
+  display: flex; align-items: center; justify-content: center;
+}
+.benefit-name { font-family: var(--font-d); font-size: 1.3rem; }
+.benefit-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.55; }
+.science-note {
+  padding: 16px 22px;
+  background: rgba(91,191,181,0.09);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 12px 12px 0;
+  font-size: 0.95rem; color: rgba(255,255,255,0.82); line-height: 1.65; margin-bottom: 18px;
+}
+.refs { display: flex; gap: 10px; flex-wrap: wrap; }
+.ref-tag {
+  padding: 7px 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(91,191,181,0.2);
+  border-radius: 8px;
+  font-size: 0.75rem; color: var(--muted); line-height: 1.45;
+}
+.ref-tag strong { display: block; color: var(--teal-glow); font-weight: 600; font-size: 0.72rem; margin-bottom: 2px; }
+
+/* ═══════════ SLIDE 4 — HISTÓRIA ═══════════ */
+.history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.timeline { border-left: 1px solid rgba(91,191,181,0.3); padding-left: 28px; }
+.titem { padding-bottom: 26px; position: relative; }
+.titem:last-child { padding-bottom: 0; }
+.titem::before {
+  content:''; position: absolute; left: -35px; top: 5px;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--teal); box-shadow: 0 0 0 4px rgba(91,191,181,0.2);
+}
+.titem strong { display: block; font-family: var(--font-d); font-size: 1.25rem; font-weight: 400; margin-bottom: 5px; }
+.titem p { font-size: 0.95rem; color: var(--muted); line-height: 1.65; }
+.quote-box {
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(91,191,181,0.18);
+  border-radius: 18px; padding: 30px;
+}
+.quote-box blockquote {
+  font-family: var(--font-d); font-style: italic; font-weight: 300;
+  font-size: clamp(1.3rem, 2.5vw, 1.9rem); color: var(--teal-glow);
+  line-height: 1.5; margin-bottom: 16px;
+}
+.quote-box cite { font-size: 0.78rem; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.38); }
+.stats-row { display: flex; gap: 16px; margin-top: 22px; }
+.stat { flex:1; background: rgba(91,191,181,0.12); border-radius: 12px; padding: 16px; text-align: center; }
+.stat .num { font-family: var(--font-d); font-size: 2.4rem; font-weight: 300; color: var(--teal-glow); line-height: 1; }
+.stat .lbl { font-size: 0.75rem; color: var(--muted); margin-top: 5px; }
+
+/* ═══════════ SLIDE 5 — FOTOS ═══════════ */
+.photos-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; height: 62vh; max-height: 540px; }
+.photo-wrap {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid rgba(91,191,181,0.22);
+  position: relative; background: rgba(15,32,39,0.4);
+}
+.photo-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.photo-solo {
+  position: relative; height: 66vh; max-height: 580px;
+  border-radius: 18px; overflow: hidden;
+  border: 1px solid rgba(91,191,181,0.22);
+  background: rgba(15,32,39,0.4);
+}
+.photo-solo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.photo-year {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 40px 18px 14px;
+  background: linear-gradient(to top, rgba(15,32,39,0.75), transparent);
+  font-size: 0.9rem; color: rgba(255,255,255,0.7); letter-spacing: 1px;
+  font-weight: 500;
+}
+
+/* ═══════════ SLIDE 6 — PRATIQUE AGORA ═══════════ */
+.pratique-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  border: 1px solid rgba(91,191,181,0.22);
+  border-radius: 22px; overflow: hidden;
+}
+.prat-col {
+  padding: 36px 32px;
+}
+.prat-col-left {
+  background: rgba(255,255,255,0.07);
+  border-right: 1px solid rgba(91,191,181,0.18);
+}
+.prat-col-right {
+  background: rgba(91,191,181,0.1);
+}
+.prat-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 20px; margin-bottom: 16px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+}
+.prat-tag-site { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.12); }
+.prat-tag-live { background: rgba(91,191,181,0.2); color: var(--teal-glow); border: 1px solid rgba(91,191,181,0.35); }
+.prat-head {
+  font-family: var(--font-d); font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 300; line-height: 1.15; margin-bottom: 22px;
+}
+.prat-head em { font-style: italic; color: var(--teal-glow); }
+.prat-features { display: flex; flex-direction: column; gap: 11px; margin-bottom: 22px; }
+.prat-feat {
+  display: flex; align-items: center; gap: 13px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 11px;
+  font-size: 0.95rem;
+}
+.prat-feat-ico {
+  font-size: 1.3rem; width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 9px; background: rgba(91,191,181,0.15);
+  display: flex; align-items: center; justify-content: center;
+}
+.prat-feat-lbl { font-size: 0.7rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--teal); margin-bottom: 1px; }
+.prat-feat-val { font-size: 0.93rem; font-weight: 400; }
+.prat-site-url {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 0.85rem; color: var(--teal-glow); font-weight: 500;
+  padding: 10px 14px; background: rgba(91,191,181,0.1);
+  border: 1px solid rgba(91,191,181,0.25); border-radius: 10px;
+}
+.prat-live-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+.prat-live-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(91,191,181,0.18);
+  border-radius: 12px;
+}
+.prat-live-ico {
+  font-size: 1.4rem; width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 10px; background: rgba(91,191,181,0.18);
+  display: flex; align-items: center; justify-content: center;
+}
+.prat-live-lbl { font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--teal); margin-bottom: 2px; }
+.prat-live-val { font-size: 1.05rem; font-weight: 500; }
+.prat-gratis {
+  text-align: center; padding: 12px;
+  background: rgba(91,191,181,0.2); border-radius: 10px;
+  font-size: 1rem; font-weight: 600; color: var(--teal-glow); letter-spacing: 0.5px;
+}
+
+/* ═══════════ SLIDE 7 — QR WHATSAPP ═══════════ */
+.s7 { text-align: center; }
+.qr-card {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 20px;
+  padding: 40px 50px;
+  background: var(--white); border-radius: 26px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5); margin-top: 10px;
+}
+.qr-card img  { width: 220px; height: 220px; display: block; }
+.qr-chip      { background: #25D366; color: #fff; padding: 8px 22px; border-radius: 30px; font-size: 0.88rem; font-weight: 600; }
+.qr-name      { color: var(--deep); font-family: var(--font-d); font-size: 1.65rem; font-weight: 400; }
+.qr-sub       { color: #6b6860; font-size: 0.9rem; max-width: 270px; line-height: 1.6; }
+.s7-foot      { margin-top: 24px; font-size: 0.88rem; color: var(--muted); }
+
+/* ── NAV ── */
+.nav-btn {
+  position: fixed; top: 50%; transform: translateY(-50%); z-index: 50;
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 1px solid rgba(91,191,181,0.3);
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);
+  color: var(--white); font-size: 1.3rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s;
+}
+.nav-btn:hover    { background: rgba(91,191,181,0.22); border-color: var(--teal); }
+.nav-btn:disabled { opacity: 0.18; pointer-events: none; }
+#btn-prev { left: 18px; }
+#btn-next { right: 18px; }
+
+/* ── CHROME ── */
+.progress {
+  position: fixed; top: 0; left: 0; height: 3px; z-index: 60;
+  background: linear-gradient(to right, var(--teal), var(--teal-glow));
+  transition: width 0.5s var(--ease);
+}
+.logo-mark {
+  position: fixed; top: 17px; left: 24px; z-index: 60;
+  font-family: var(--font-d); font-size: 1rem; color: rgba(255,255,255,0.4);
+}
+.logo-mark em { font-style: italic; }
+.slide-num {
+  position: fixed; top: 20px; right: 24px; z-index: 60;
+  font-size: 0.75rem; letter-spacing: 1.5px; color: rgba(255,255,255,0.28);
+}
+.dots {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  z-index: 60; display: flex; gap: 9px;
+}
+.dot {
+  width: 7px; height: 7px; border-radius: 4px;
+  background: rgba(255,255,255,0.25); cursor: pointer;
+  transition: all 0.35s var(--ease); border: none;
+}
+.dot.on { background: var(--teal); width: 24px; }
+.hint {
+  position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%);
+  font-size: 0.68rem; color: rgba(255,255,255,0.18); letter-spacing: 1px; z-index: 60;
+}
+</style>
+</head>
+<body>
+
+<div class="logo-mark">Respire. <em>De verdade.</em></div>
+<div class="progress" id="prog"></div>
+<div class="slide-num" id="num">01 / 07</div>
+<button class="nav-btn" id="btn-prev" disabled>←</button>
+<button class="nav-btn" id="btn-next">→</button>
+<nav class="dots" id="dots"></nav>
+<div class="hint">← → ou Espaço para navegar</div>
+
+<div class="deck">
+
+  <!-- ══ 1 — HERO ══ -->
+  <section class="slide s1 active">
+    <div class="orbs"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="orb orb-c"></div></div>
+    <div class="inner" style="text-align:center">
+      <div class="badge">Núcleo QVT · Cefor / Ifes</div>
+      <h1>Respire.<br><em>De verdade.</em></h1>
+      <p class="sub">15 minutos de respiração consciente podem transformar como você trabalha, dorme e vive.</p>
+      <div class="breath-orb"><span>respire</span></div>
+    </div>
+  </section>
+
+  <!-- ══ 2 — O QUE É ══ -->
+  <section class="slide">
+    <div class="orbs"><div class="orb orb-a"></div><div class="orb orb-b"></div></div>
+    <div class="inner">
+      <span class="label">O que é o Respira</span>
+      <h2 class="title">Um programa simples.<br><em>Com ganhos reais.</em></h2>
+      <div class="cards">
+        <div class="card">
+          <div class="card-ico">🧘</div>
+          <div class="card-head">Respiração consciente</div>
+          <div class="card-text">Técnicas baseadas em evidências para regular o sistema nervoso e reduzir o estresse no expediente.</div>
+        </div>
+        <div class="card">
+          <div class="card-ico">⏱️</div>
+          <div class="card-head">Só 15 minutos</div>
+          <div class="card-text">Uma pausa semanal, ao vivo, para respirar junto. Curto o suficiente para caber na agenda de qualquer servidor.</div>
+        </div>
+        <div class="card">
+          <div class="card-ico">🌿</div>
+          <div class="card-head">Gratuito e aberto</div>
+          <div class="card-text">Iniciativa do Núcleo QVT do Cefor, aberta a toda a comunidade do Ifes — sem pré-requisitos.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 3 — BENEFÍCIOS ══ -->
+  <section class="slide">
+    <div class="orbs"><div class="orb orb-a"></div><div class="orb orb-c"></div></div>
+    <div class="inner">
+      <span class="label">Por que respirar</span>
+      <h2 class="title">Benefícios <em>comprovados</em></h2>
+      <div class="benefits">
+        <div class="benefit">
+          <div class="benefit-ico">❤️</div>
+          <div class="benefit-name">Coração</div>
+          <div class="benefit-desc">Reduz pressão arterial e frequência cardíaca</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-ico">🧠</div>
+          <div class="benefit-name">Foco</div>
+          <div class="benefit-desc">Melhora clareza mental e concentração</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-ico">😴</div>
+          <div class="benefit-name">Sono</div>
+          <div class="benefit-desc">Participantes relataram melhora significativa no sono</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-ico">🤕</div>
+          <div class="benefit-name">Dores</div>
+          <div class="benefit-desc">Alívio de dores de cabeça por tensão</div>
+        </div>
+        <div class="benefit">
+          <div class="benefit-ico">😌</div>
+          <div class="benefit-name">Calma</div>
+          <div class="benefit-desc">Mais tranquilidade mesmo nos dias difíceis</div>
+        </div>
+      </div>
+      <div class="science-note">
+        A respiração consciente ativa o <strong>nervo vago</strong> — o principal "interruptor" que diz ao corpo: <em>você está seguro.</em> Isso reduz o cortisol e permite que o cérebro funcione com clareza.
+      </div>
+      <div class="refs">
+        <div class="ref-tag"><strong>Benson, H. · Harvard (1975)</strong>Pioneiro: respiração controlada ativa resposta fisiológica oposta ao estresse — "The Relaxation Response"</div>
+        <div class="ref-tag"><strong>Zaccaro et al. · Frontiers in Neuroscience (2018)</strong>Revisão sistemática de 15 estudos confirmando efeitos na saúde mental e cardiovascular</div>
+        <div class="ref-tag"><strong>Ma et al. · Frontiers in Psychology (2017)</strong>Ensaio clínico: respiração diafragmática melhora atenção e reduz estresse em adultos saudáveis</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 4 — HISTÓRIA ══ -->
+  <section class="slide">
+    <div class="orbs"><div class="orb orb-b"></div><div class="orb orb-c"></div></div>
+    <div class="inner">
+      <div class="history-grid">
+        <div>
+          <span class="label">Nossa história</span>
+          <h2 class="title">Começou<br><em>presencialmente</em></h2>
+          <div class="timeline">
+            <div class="titem">
+              <strong>2022 — Origem no Cefor</strong>
+              <p>O projeto nasceu durante o período de pandemia, em encontros presenciais que reuniram servidores do Cefor para práticas de respiração e bem-estar — uma iniciativa piloto do Núcleo QVT.</p>
+            </div>
+            <div class="titem">
+              <strong>8 meses de prática presencial</strong>
+              <p>Sessões regulares ao longo de 2022, com exercícios de respiração e qualidade de vida no trabalho.</p>
+            </div>
+            <div class="titem">
+              <strong>2026 em diante — Online para o Ifes</strong>
+              <p>A prática migrou para o formato online e se expandiu para toda a comunidade do Ifes, com sessões semanais ao vivo toda quarta-feira.</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="quote-box">
+            <blockquote>"Eu respiro 15 minutos por semana de forma consciente. A não ser nas semanas difíceis. Nas semanas difíceis, eu respiro 30."</blockquote>
+            <cite>— Participante</cite>
+          </div>
+          <div class="stats-row">
+            <div class="stat"><div class="num">8</div><div class="lbl">meses presencial</div></div>
+            <div class="stat"><div class="num">2022</div><div class="lbl">ano de início</div></div>
+            <div class="stat"><div class="num">Ifes</div><div class="lbl">alcance hoje</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5 — FOTOS ══ -->
+  <section class="slide">
+    <div class="orbs"><div class="orb orb-a"></div><div class="orb orb-b"></div></div>
+    <div class="inner inner-wide">
+      <span class="label" style="display:block;margin-bottom:16px">Momentos do presencial · Cefor</span>
+      <div class="photos-duo">
+        <div class="photo-wrap">
+          <img src="assets/fotos/respiração cefor 2022-08-15 - 20220815_094023.jpg" alt="Sessão de respiração Cefor 2022">
+          <div class="photo-year">2022</div>
+        </div>
+        <div class="photo-wrap">
+          <img src="assets/fotos/respiração cefor 2022-08-29 - 20220829_094705.jpg" alt="Grupo respiração Cefor 2022">
+          <div class="photo-year">2022</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 6 — PRATIQUE AGORA ══ -->
+  <section class="slide">
+    <div class="orbs"><div class="orb orb-a"></div><div class="orb orb-c"></div></div>
+    <div class="inner inner-wide">
+      <span class="label" style="margin-bottom:18px">Pratique agora</span>
+      <h2 class="title" style="margin-bottom:24px;">Duas formas de <em>começar hoje</em></h2>
+      <div class="pratique-grid">
+
+        <!-- Coluna esquerda: sozinho no site -->
+        <div class="prat-col prat-col-left">
+          <div class="prat-tag prat-tag-site">💻 No site · A qualquer hora</div>
+          <div class="prat-head">Pratique<br><em>sozinho</em></div>
+          <div class="prat-features">
+            <div class="prat-feat">
+              <div class="prat-feat-ico">⏱️</div>
+              <div>
+                <div class="prat-feat-lbl">Cronômetro</div>
+                <div class="prat-feat-val">3, 5 ou 10 minutos — guiado</div>
+              </div>
+            </div>
+            <div class="prat-feat">
+              <div class="prat-feat-ico">🫁</div>
+              <div>
+                <div class="prat-feat-lbl">Técnicas</div>
+                <div class="prat-feat-val">Quadrada · Circular · Narinas Alternadas · Completa</div>
+              </div>
+            </div>
+            <div class="prat-feat">
+              <div class="prat-feat-ico">🎵</div>
+              <div>
+                <div class="prat-feat-lbl">Sons ambientes</div>
+                <div class="prat-feat-val">Ruído marrom · Água · Vento</div>
+              </div>
+            </div>
+            <div class="prat-feat">
+              <div class="prat-feat-ico">🙆</div>
+              <div>
+                <div class="prat-feat-lbl">Bônus</div>
+                <div class="prat-feat-val">9 alongamentos com cronômetro integrado</div>
+              </div>
+            </div>
+          </div>
+          <div class="prat-site-url">🌐 respira.inorama.com.br</div>
+        </div>
+
+        <!-- Coluna direita: ao vivo -->
+        <div class="prat-col prat-col-right">
+          <div class="prat-tag prat-tag-live">📡 Sessões ao vivo · Toda semana</div>
+          <div class="prat-head">Pratique com<br><em>a gente</em></div>
+          <div class="prat-live-list">
+            <div class="prat-live-item">
+              <div class="prat-live-ico">📅</div>
+              <div>
+                <div class="prat-live-lbl">Quando</div>
+                <div class="prat-live-val">Quartas-feiras · 12h</div>
+              </div>
+            </div>
+            <div class="prat-live-item">
+              <div class="prat-live-ico">⏱️</div>
+              <div>
+                <div class="prat-live-lbl">Duração</div>
+                <div class="prat-live-val">15 minutos</div>
+              </div>
+            </div>
+            <div class="prat-live-item">
+              <div class="prat-live-ico">💻</div>
+              <div>
+                <div class="prat-live-lbl">Formato</div>
+                <div class="prat-live-val">Online · Conferência Web RNP</div>
+              </div>
+            </div>
+            <div class="prat-live-item">
+              <div class="prat-live-ico">🌿</div>
+              <div>
+                <div class="prat-live-lbl">Para quem</div>
+                <div class="prat-live-val">Toda a comunidade Ifes</div>
+              </div>
+            </div>
+          </div>
+          <div class="prat-gratis">✓ Gratuito — sem pré-requisitos</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 7 — FOTO 2026 ══ -->
+  <section class="slide">
+    <div class="orbs"><div class="orb orb-b"></div><div class="orb orb-c"></div></div>
+    <div class="inner inner-wide">
+      <span class="label" style="display:block;margin-bottom:16px">Respira hoje · Online ao vivo</span>
+      <div class="photo-solo">
+        <img src="assets/fotos/respiracao cefor 2026 - Captura de tela 2026-06-16 154106.jpg" alt="Sessão online Respira Cefor 2026">
+        <div class="photo-year">2026</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 8 — QR WHATSAPP ══ -->
+  <section class="slide s7">
+    <div class="orbs"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="orb orb-c"></div></div>
+    <div class="inner" style="text-align:center">
+      <span class="label">Participe</span>
+      <h2 class="title" style="margin-bottom:20px">Entre no grupo de<br><em>avisos e dicas</em></h2>
+      <div class="qr-card">
+        <img src="assets/qrcodes/qrcode-GrupoWhatsapp-Respira-extended.svg" alt="QR Code Grupo WhatsApp Respira Cefor">
+        <div class="qr-chip">WhatsApp</div>
+        <div class="qr-name">Grupo Respira Cefor</div>
+        <div class="qr-sub">Aponte a câmera do celular para o QR Code e entre no grupo de avisos. Apenas admins enviam mensagens.</div>
+      </div>
+      <p class="s7-foot">Lembretes das sessões · Conteúdos sobre respiração · Dicas de qualidade de vida</p>
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<script>
+const slides  = [...document.querySelectorAll('.slide')];
+const TOTAL   = slides.length;
+const dotsEl  = document.getElementById('dots');
+const progEl  = document.getElementById('prog');
+const numEl   = document.getElementById('num');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+let cur = 0, busy = false;
+
+slides.forEach((_, i) => {
+  const b = document.createElement('button');
+  b.className = 'dot' + (i === 0 ? ' on' : '');
+  b.setAttribute('aria-label', 'Slide ' + (i + 1));
+  b.addEventListener('click', () => go(i));
+  dotsEl.appendChild(b);
+});
+
+function pad(n) { return n < 10 ? '0' + n : n; }
+
+function refresh() {
+  progEl.style.width = ((cur + 1) / TOTAL * 100) + '%';
+  numEl.textContent  = pad(cur + 1) + ' / ' + pad(TOTAL);
+  dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === cur));
+  btnPrev.disabled = cur === 0;
+  btnNext.disabled = cur === TOTAL - 1;
+}
+
+function go(target) {
+  if (busy || target === cur || target < 0 || target >= TOTAL) return;
+  busy = true;
+  slides[cur].classList.remove('active');
+  slides[target].classList.add('active');
+  cur = target;
+  refresh();
+  setTimeout(() => { busy = false; }, 600);
+}
+
+btnPrev.addEventListener('click', () => go(cur - 1));
+btnNext.addEventListener('click', () => go(cur + 1));
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+  if (['ArrowLeft','ArrowUp'].includes(e.key))         { e.preventDefault(); go(cur - 1); }
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 48) go(dx < 0 ? cur + 1 : cur - 1);
+}, { passive: true });
+
+refresh();
+</script>
+</body>
+</html>

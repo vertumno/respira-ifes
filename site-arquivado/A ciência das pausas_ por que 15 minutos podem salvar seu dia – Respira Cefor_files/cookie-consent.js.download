@@ -1,0 +1,56 @@
+/* cookie-consent.js — gerencia consentimento e visitor_id */
+(function () {
+  'use strict';
+
+  const CONSENT_KEY = 'respire_consent';
+  const VID_KEY     = 'respire_vid';
+  const EXPIRY_DAYS = 365;
+
+  function getCookie(name) {
+    const m = document.cookie.match('(?:^|;)\\s*' + name + '=([^;]*)');
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 86400000);
+    document.cookie = name + '=' + encodeURIComponent(value) +
+      '; expires=' + d.toUTCString() + '; path=/; SameSite=Lax';
+  }
+
+  function generateVid() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+  }
+
+  const banner  = document.getElementById('cookieBanner');
+  const btnOk   = document.getElementById('cookieAccept');
+  const btnNo   = document.getElementById('cookieDecline');
+
+  // Expor estado global
+  window.RespireConsent = {
+    hasConsent: () => getCookie(CONSENT_KEY) === '1',
+    getVid:     () => getCookie(VID_KEY),
+  };
+
+  // Mostrar banner se ainda não decidiu
+  if (!getCookie(CONSENT_KEY)) {
+    setTimeout(() => banner.classList.remove('hidden'), 800);
+  }
+
+  btnOk && btnOk.addEventListener('click', () => {
+    setCookie(CONSENT_KEY, '1', EXPIRY_DAYS);
+    if (!getCookie(VID_KEY)) {
+      setCookie(VID_KEY, generateVid(), EXPIRY_DAYS);
+    }
+    banner.classList.add('hidden');
+    window.dispatchEvent(new CustomEvent('respire:consent', { detail: { accepted: true } }));
+  });
+
+  btnNo && btnNo.addEventListener('click', () => {
+    setCookie(CONSENT_KEY, '0', EXPIRY_DAYS);
+    banner.classList.add('hidden');
+    window.dispatchEvent(new CustomEvent('respire:consent', { detail: { accepted: false } }));
+  });
+})();

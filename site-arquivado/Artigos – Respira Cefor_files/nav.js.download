@@ -1,0 +1,36 @@
+/* nav.js — scroll + toggle do menu mobile + dropdown */
+(function () {
+  'use strict';
+  const nav    = document.getElementById('nav');
+  const toggle = document.getElementById('navToggle');
+  const links  = document.getElementById('navLinks');
+
+  if (!nav) return;
+
+  // Efeito scroll
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+
+  // Toggle menu mobile
+  toggle && toggle.addEventListener('click', () => links && links.classList.toggle('open'));
+
+  // Fechar menu ao clicar em link (exceto pai de dropdown no mobile)
+  links && links.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const li = a.closest('li');
+      // No mobile, item pai de dropdown: só abre/fecha submenu
+      if (li && li.classList.contains('has-dropdown') && window.innerWidth < 640) {
+        e.preventDefault();
+        li.classList.toggle('open');
+        return;
+      }
+      links.classList.remove('open');
+    });
+  });
+
+  // Fechar dropdown ao clicar fora
+  document.addEventListener('click', (e) => {
+    if (!nav.contains(e.target)) {
+      links && links.querySelectorAll('.has-dropdown').forEach(li => li.classList.remove('open'));
+    }
+  });
+})();
